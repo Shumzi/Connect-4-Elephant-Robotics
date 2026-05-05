@@ -23,56 +23,40 @@ DEFAULT_JSON_PATH = PROJECT_ROOT / "connect4_engine" / "hardware" / "coords.json
 ANGLES_JSON_PATH = PROJECT_ROOT / "connect4_engine" / "hardware" / "angles.json"
 
 
-def get_pickup_fst_lst_pucks_sequence(side="red"):
-    """Sequence to mark each puck location in the stack, top to bottom.
-    Picks up each puck, returns to hover, discards, then moves to next."""
+def calibrate_puck_stack(robot: RobotCommunicator, coord_json, angles_json, clr="red"):
+    """
+    1. go to dropoff location
+    2. go to location of first puck
+    3. use <enter> to toggle pump on/release&off
+    4. mark last puck.
+    5. interp locations by moving head and saving angles.
+    6. put back all pucks
+    7. test throwaway all pucks works ok"""
     steps = []
-    steps.append(("observe", "angles", ("angle_table", "observe"), 100, None))
-    steps.append(("prepare", "angles", ("angle_table", "prepare"), 100, None))
-    steps.append(
-        (f"stack-hover-{side}", "coords", ("angle_table", f"stack-hover-{side}"), 50, 0)
-    )
-    for i in [0, 20]:
-        steps.append(
-            (
-                f"stack-hover-{side}-{i}",
-                "forward-coords",
-                ("angle_table", f"stack-{side}-{i}"),
-                50,
-                1,
-            )
-        )
-        steps.append(("pump-on", "pump", None, None, None))
-        steps.append(("pump-off", "pump", None, None, None))
-        steps.append(
-            (
-                f"stack-hover-{side}-{i}",
-                "reverse-coords",
-                ("angle_table", f"stack-{side}-{i}"),
-                50,
-                1,
-            )
-        )
-        steps.append(
-            (
-                f"discard-puck-{side}",
-                "coords",
-                ("angle_table", f"discard-puck-{side}"),
-                50,
-                0,
-            )
-        )
-        steps.append(("pump-release", "pump", None, None, None))
-        steps.append(
-            (
-                f"stack-hover-{side}",
-                "coords",
-                ("angle_table", f"stack-hover-{side}"),
-                50,
-                0,
-            )
-        )
-    return steps
+    steps.append((f"discard-puck", "coords", ("angle_table", "discard-puck")))
+    steps.append((f"stack-{clr}-start", "coords", ("angle_table", f"stack-{clr}-0")))
+    steps.append((f"stack-{clr}-end", "coords", ("angle_table", f"stack-{clr}-20")))
+    robot.send_coords(angles_json["angle_table"]["discard-puck"], 100)
+    edit_mode_loop(robot, coord_json, angles_json, steps[0], json_path=DEFAULT_JSON_PATH, step_index=1)
+    robot.send_coords(angles_json["angle_table"][f"stack-{clr}-start"], 100)
+    edit_mode_loop(robot, coord_json, angles_json, steps[1], json_path=DEFAULT_JSON_PATH, step_index=1)
+    robot.release_servos()
+    inp = input('starting discard sequence')
+    ######  remove all pucks quickly
+    while(inp != 'q'):
+        robot.pump_on_short_then_off()
+        inp = input('<enter> for release')
+        robot.pump_release_and_off()
+        inp = input('<enter> for pump on or q for exit')
+    ###### save last puck loc
+    robot.send_coords(angles_json["angle_table"][f"prepare"], 100)            
+    robot.send_coords(angles_json["angle_table"][f"stack-{clr}-0"], 100)    
+    robot.send_coords(angles_json["angle_table"][f"stack-{clr}-20"], 100)
+    edit_mode_loop(robot, coord_json, angles_json, steps[2], json_path=DEFAULT_JSON_PATH, step_index=1)
+    interp_from_first_and_last(robot, coord_json, angles_json, clr)
+    input('put back all pucks')
+    ###### test successful pucks
+    throw_away_all_pucks(robot, coord_json, angles_json, clr)
 
 
 def get_puck_seq(counter, start_seq, end_seq, end_seq_angles):
@@ -123,9 +107,10 @@ def interp_from_first_and_last(
     lst = coord_json["angle_table"][f"stack-{clr}-20"]
     lst_angles = angles_json["angle_table"][f"stack-{clr}-end"]
     robot.send_angles(coord_json["angle_table"]["prepare"], 50)
-    robot.send_coords(fst, 50)
-    for i in range(21):
-        puck_seq_i = get_puck_seq(i, fst, lst, lst_angles)
+    robot.send_angles(angles_json["angle_table"][f"stack-{clr}-20"], 50)
+    for i in range(1,21):
+        puck_seq_i = get_puck_seq(20-i, fst, lst, lst_angles)
+        print(f'going to coord {20-i}')
         robot.send_coords(puck_seq_i[-1], 50) # go one step down
         puck_seq_i[-1] = (
             robot.get_current_angles()
@@ -256,7 +241,8 @@ def edit_mode_loop(
 ):
     """
     Keyboard loop: nudge X/Y/Z, release, lock, save, next.
-    save always saves the angles in coord_angles_json as well as whatever was determined in coord_json.
+    save always saves the angles in angles_json as well as whatever was determined in coord_json.
+    always loads from coord_json for the references, angles_json is write-only.
     """
     name, kind, key = step
     print(f"\n[Edit mode] Step: {name} (index {step_index})")
@@ -267,11 +253,12 @@ def edit_mode_loop(
     # Initialize base coordinate from JSON (or current robot pos if we skipped the move)
     if kind == "coords" or kind == "forward-coords":
         saved = get_value(coord_json, key)
-        base = (
-            list(saved)
-            if (moved and saved is not None)
-            else list(robot.get_current_coords())
-        )
+        if moved and saved is not None:
+            base = list(saved)
+            if isinstance(base[0], list): # if our location is an interpolation, take the end loc
+                base = base[0]
+        else:
+            base = list(robot.get_current_coords())
         offset = [0, 0, 0]  # Accumulated offset for X, Y, Z only
     else:
         base = None
@@ -437,8 +424,8 @@ def main():
     seq = input(
         """which sequence?
 1. drop positions
-2. puck pickup first & last (red)
-3. puck pickup first & last (ylw)
+2. calibrate red stack
+3. calibrate ylw stack
 4. interp pucks (red)
 5. interp pucks (ylw)
 6. throw away all red pucks (after setting values)
@@ -452,9 +439,11 @@ def main():
     if seq == "1":
         sequence = get_drop_table_sequence()
     elif seq == "2":
-        sequence = get_pickup_fst_lst_pucks_sequence("red")
+        calibrate_puck_stack(robot, coord_json, angles_json, "red")
+        return
     elif seq == "3":
-        sequence = get_pickup_fst_lst_pucks_sequence("ylw")
+        calibrate_puck_stack(robot, coord_json, angles_json, "ylw")
+        return
     elif seq == "4":
         interp_from_first_and_last(robot, coord_json, angles_json, "red")
         return
