@@ -233,7 +233,7 @@ void reset_solenoids(String stackSizes)
     Serial.println(msg);
     if (pucksToRemove > 0)
     {
-      for (int puckno = 0; puckno < pucksToRemove + 1; ++puckno)
+      for (int puckno = 0; puckno < pucksToRemove + 4; ++puckno)
       {
         writeToSr(1 << i);
         delay(PUCK_DROPTIME_MS);
@@ -244,14 +244,14 @@ void reset_solenoids(String stackSizes)
     }
   }
   // fast sequence to make sure solenoids close (open and close each solenoid a bunch of times)
-  for (int i = 0; i < 7; ++i) {
-    for (int j = 0; j < 3; ++j) {
-      writeToSr(1 << i);
-      delay(50);
-      writeToSr(0);
-      delay(50);
-    }
-  }
+  // for (int i = 0; i < 7; ++i) {
+  //   for (int j = 0; j < 3; ++j) {
+  //     writeToSr(1 << i);
+  //     delay(50);
+  //     writeToSr(0);
+  //     delay(50);
+  //   }
+  // }
   writeToSr(0);
 }
 

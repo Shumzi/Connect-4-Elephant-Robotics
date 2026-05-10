@@ -9,7 +9,7 @@ from connect4_engine.hardware.arduino import ArduinoCommunicator
 from connect4_engine.hardware.mock import ArduinoPumpNoOp
 from connect4_engine.hardware.robot import RobotCommunicator
 from connect4_engine.utils.config import resolve_port
-from time import sleep
+from time import sleep, perf_counter
 
 if __name__ == "__main__":
     ard_port = resolve_port("arduino")
@@ -27,7 +27,11 @@ if __name__ == "__main__":
         
         if sol_is_on:
             ard.turn_off_solenoids()
+            end = perf_counter()
+            elapsed_ms = (end - start) * 1000
+            print(f"Time passed: {elapsed_ms:.2f} ms")
             sol_is_on = False
         else:
             ard.turn_on_solenoid(sol_to_turn_on)           
+            start = perf_counter()
             sol_is_on = True
