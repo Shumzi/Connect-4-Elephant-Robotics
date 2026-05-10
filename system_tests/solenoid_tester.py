@@ -26,7 +26,7 @@ if __name__ == "__main__":
         elif cmd.startswith('o'):
             time_on = int(cmd[1:])
             ard.turn_on_solenoid(sol_to_turn_on)           
-            sleep(time_on)
+            sleep(time_on / 1000)
             ard.turn_off_solenoids()
 
         elif cmd in '1234567':
