@@ -16,12 +16,19 @@ if __name__ == "__main__":
     ard = ArduinoCommunicator(ser=serial.Serial(ard_port, 115200))
     sol_to_turn_on = 0
     sol_is_on = False
+    time_on = 0
     while(True):
         cmd = input(f"select solenoid to open or press <enter> to toggle. ")
         if(cmd == 'q'):
             break
         elif cmd == '':
             pass
+        elif cmd.startswith('o'):
+            time_on = int(cmd[1:])
+            ard.turn_on_solenoid(sol_to_turn_on)           
+            sleep(time_on)
+            ard.turn_off_solenoids()
+
         elif cmd in '1234567':
             sol_to_turn_on = int(cmd[0]) - 1
         
