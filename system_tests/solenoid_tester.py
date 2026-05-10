@@ -28,6 +28,7 @@ if __name__ == "__main__":
             ard.turn_on_solenoid(sol_to_turn_on)           
             sleep(time_on / 1000)
             ard.turn_off_solenoids()
+            continue
 
         elif cmd in '1234567':
             sol_to_turn_on = int(cmd[0]) - 1
