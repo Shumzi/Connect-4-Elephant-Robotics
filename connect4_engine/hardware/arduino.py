@@ -90,6 +90,12 @@ class ArduinoCommunicator(IArduino):
         else:
             self.send_message("RESET")
         self._accept_moves = False
+    
+    def turn_on_solenoid(self, solNo):
+        self.send_message(f"OPEN {solNo}")
+
+    def turn_off_solenoids(self):
+        self.send_message("CLOSE")
 
     @timed
     def turn_on_pump(self):
