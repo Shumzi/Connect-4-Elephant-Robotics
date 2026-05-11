@@ -23,5 +23,6 @@ breaked for 50min w bitbat
 # cleanup
 - new non-gpt-ish readme.
 - delete non-essential files
+    - [X] cleanup arduino code
 - explain ocp structure + how to cmake the solver.
 - update todos in readme.md
