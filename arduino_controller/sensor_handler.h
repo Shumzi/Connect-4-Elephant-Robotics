@@ -33,17 +33,19 @@
 #define ST_PIN 8       // 595 - write for solenoids
 #define LED_BTN_PIN 9
 
-const int DEBOUNCE_MS = 50;
-const int ms_to_reset = 2000; // no. of ms user needs to press button to reset the game.
-unsigned long lastResetSolenoids = 0;
-const int MAX_MS_TO_RESET_SOLENOIDS = 3000;
-const int PUCK_DROPTIME_MS = 30;
-const int COOLDOWN_PUCK_MS = 300;
-const int COOLDOWN_BETWEEN_COLUMNS_MS = 500;
-unsigned long last_change_ms = 0;
-byte solenoid_state = 0;
+// Button variables
+const int DEBOUNCE_MS_BTN = 50; // debounce time for button press activation (contacts are jumpy).
+const int ms_to_reset_game = 2000; // ms use has to press button till game is reset (and cleanup gutter sequence initiates).
 
-// Timing variables
+// Solenoid (gutter) variables
+unsigned long lastResetSolenoids = 0; // used for resetting gutter solenoids.
+const int MAX_MS_TO_RESET_SOLENOIDS = 3000; // resetting gutter solenoids after this amount of ms.
+const int PUCK_DROPTIME_MS = 30;  // time to keep solenoid open for letting puck drop from column to gutter.
+const int COOLDOWN_PUCK_MS = 300; //  time to wait after closing solenoid to roll into slide 
+                                  // (avoid whiplash effect of puck going up then other puck gets stuck on it.)
+const int COOLDOWN_BETWEEN_COLUMNS_MS = 500;  // time to wait between columns (add a bit just for safety)
+
+// pump variables
 unsigned long pumpStartTime = 0;
 unsigned long pumpReleaseTime = 0;
 const unsigned long pumpTimeout = 30000UL; // 30 seconds in ms
@@ -64,6 +66,7 @@ void setup_sensors()
   digitalWrite(SOLENOID_PIN, LOW);
 }
 
+// ----------------------PUMP FUNCTIONS----------------------
 void turnOnPump()
 {
   digitalWrite(PUMP_PIN, HIGH);
@@ -73,6 +76,9 @@ void turnOnPump()
   pumpRunning = true;
 }
 
+/**
+ * turn off pump. does not release suction betwee pump and puck if exists.
+ */
 void shutOffPump()
 {
 
@@ -83,6 +89,9 @@ void shutOffPump()
   Serial.println("LOG: PUMP OFF");
 }
 
+/**
+ * activate solenoid release valve to release suction created between pump and puck.
+ */
 void releasePump()
 {
   digitalWrite(PUMP_PIN, LOW);
@@ -94,9 +103,11 @@ void releasePump()
   Serial.println("LOG: PUMP RELEASE");
 }
 
+/**
+ * run on->release->off sequence for debugging the pump.
+ */
 void pump_on_off()
 {
-
   turnOnPump();
   Serial.println("pump on");
   delay(2000);
@@ -106,6 +117,8 @@ void pump_on_off()
   shutOffPump();
   Serial.println("LOG: PUMP ONOFF");
 }
+
+// ----------------------BUTTON FUNCTIONS----------------------
 
 void led_on()
 {
@@ -119,6 +132,9 @@ void led_off()
   digitalWrite(LED_BTN_PIN, LOW);
 }
 
+/**
+ * pulse led intensity in a pleasing fashion.
+ */
 void led_strobe(int rounds = 1)
 {
   Serial.println("LOG: LED STROBE (SIN)");
@@ -132,21 +148,45 @@ void led_strobe(int rounds = 1)
     }
 }
 
-void handlePump()
+
+// register reset button after ms_to_reset_game milliseconds, so user gets response more immediatly than on release.
+void handleButtonPress()
 {
-  if (pumpRunning && (millis() - pumpStartTime >= pumpTimeout))
+  static bool wasPressed = false;
+  static unsigned long pressStart = 0;
+  static unsigned long dePressStart = 0;
+  static bool sentStart = false;
+  bool pressed = !digitalRead(BTN_PIN); // pullup defaults to high except on press.
+  // note - debouncing isn't so important since we assume user will keep pressing... doing it mostly for logging.
+  if (pressed && !wasPressed && (millis() - dePressStart) > DEBOUNCE_MS_BTN)
   {
-    shutOffPump();
+    Serial.println("LOG: PRESS STARTED");
+    wasPressed = true;
+    pressStart = millis();
+  }
+  else if (!pressed && wasPressed && (millis() - pressStart) > DEBOUNCE_MS_BTN)
+  {
+    Serial.println("LOG: PRESS RESET");
+    wasPressed = false;
+    sentStart = false;
+    dePressStart = millis();
+  }
+  else if (wasPressed && !sentStart && (millis() - pressStart) > ms_to_reset_game)
+  {
+    Serial.println("START");
+    sentStart = true;
+    led_strobe(5);
   }
 }
 
-void writeToSr(byte data)
-{
-  digitalWrite(ST_PIN, LOW);
-  SPI.transfer(data);         // Send output byte
-  digitalWrite(ST_PIN, HIGH); // Latch output
-}
 
+// ----------------------SPI FUNCTIONS----------------------
+
+// ----------------------PHOTORESISTOR FUNCTIONS----------------------
+
+/**
+ * update state of photoresistors. after this function call SPI.transfer()
+ */
 void update165()
 {
   // Latch the inputs into the shift register
@@ -156,16 +196,11 @@ void update165()
   delayMicroseconds(5);
 }
 
-void periodicResetSolenoids()
-{
-  if (millis() - lastResetSolenoids > MAX_MS_TO_RESET_SOLENOIDS)
-  {
-    writeToSr(0);
-    Serial.println("LOG: incremental reset solenoids");
-    lastResetSolenoids = millis();
-  }
-}
-
+/**
+* check for disk falling into column, thereby blocking the column's led from the LDR on the other side.
+* NOTE: current physical state is such that player can ruin the flow 
+*       by almost dropping puck then picking it up again.
+*/
 void handleDiscDetection()
 {
   static byte last_data = 0;
@@ -176,7 +211,7 @@ void handleDiscDetection()
   if (data != 0 && last_data == 0)
   {
     Serial.print("DROP ");
-    Serial.println(__builtin_ctz(data));
+    Serial.println(__builtin_ctz(data)); // count trailing zeros, i.e. puck column.
   }
   else if (data == 0 && last_data != 0)
   {
@@ -188,35 +223,32 @@ void handleDiscDetection()
   last_data = data;
 }
 
-// register reset button after ms_to_reset milliseconds, so user gets response more immediatly than on release.
-void handleButtonPress()
+// ---------------------- SOLENOID FUNCTIONS----------------------
+
+/**
+ * write state to solenoid gutters.
+ */
+void writeToSr(byte data)
 {
-  static bool wasPressed = false;
-  static unsigned long pressStart = 0;
-  static unsigned long dePressStart = 0;
-  static bool sentStart = false;
-  bool pressed = !digitalRead(BTN_PIN); // pullup defaults to high except on press.
-  // note - debouncing isn't so important since we assume user will keep pressing... doing it mostly for logging.
-  if (pressed && !wasPressed && (millis() - dePressStart) > DEBOUNCE_MS)
+  digitalWrite(ST_PIN, LOW);
+  SPI.transfer(data);         // Send output byte
+  digitalWrite(ST_PIN, HIGH); // Latch output
+}
+
+/**
+ * reset solenoids since if left unchecked, noise might flip one on and burn it.
+ */
+void periodicResetSolenoids()
+{
+  if (millis() - lastResetSolenoids > MAX_MS_TO_RESET_SOLENOIDS)
   {
-    Serial.println("LOG: PRESS STARTED");
-    wasPressed = true;
-    pressStart = millis();
-  }
-  else if (!pressed && wasPressed && (millis() - pressStart) > DEBOUNCE_MS)
-  {
-    Serial.println("LOG: PRESS RESET");
-    wasPressed = false;
-    sentStart = false;
-    dePressStart = millis();
-  }
-  else if (wasPressed && !sentStart && (millis() - pressStart) > ms_to_reset)
-  {
-    Serial.println("START");
-    sentStart = true;
-    led_strobe(5);
+    writeToSr(0);
+    Serial.println("LOG: incremental reset solenoids");
+    lastResetSolenoids = millis();
   }
 }
+
+
 
 void reset_solenoids(String stackSizes)
 {

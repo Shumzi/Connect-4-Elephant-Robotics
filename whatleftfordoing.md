@@ -14,6 +14,7 @@ breaked for 50min w bitbat
 # main game
 - update movement of robot in game to our calibrated sequences
 - update button press for light up then restart
+    - on getting start from thread, need to have it kill the existing game..?
 - request explanation graphic of "press x seconds to reset"
 # future calibration - meeting w amir, his choice.
 - screw in robot again
