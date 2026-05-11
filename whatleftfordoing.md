@@ -8,6 +8,7 @@ breaked for 50min w bitbat
 - run overnight.
 # gutter
 - [X] drill holes - KINDA...
+- [ ] one more hole for the tl column (+ nut on other side)
 - [ ] screw solenoids in place. might need more advice from ppl.
 - [ ] update solenoid pulsing code to make sure all pucks fall in. (esp. columns 1 and 2 that often don't fall fast enough).
 # main game
