@@ -25,9 +25,7 @@ Runs the arm through a safe sequence; after each step you enter **edit mode**:
 - **n**: next step (no save)
 
 ```bash
-python -m system_tests.test_robot_locations --port COM11
-python -m system_tests.test_robot_locations --port COM11 --json-path path/to/robot_locations.json
-python -m system_tests.test_robot_locations --port COM11 --no-edit   # run sequence only, no edit mode
+python -m system_tests.calibrate_robot_locations
 ```
 
 ## 3. Arduino tests

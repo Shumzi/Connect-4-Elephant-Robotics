@@ -1,7 +1,7 @@
 """
-Robot location test: run the arm through a safe sequence, then enter edit mode
+Robot calibration: run the arm through a sequence, then enter edit mode
 after each step (nudge X/Y/Z, release/lock motors, save to JSON, next).
-Run from project root: python -m system_tests.test_robot_locations --port COM11 [--json-path PATH]
+Run from project root: python -m system_tests.test_robot_locations
 """
 
 import argparse

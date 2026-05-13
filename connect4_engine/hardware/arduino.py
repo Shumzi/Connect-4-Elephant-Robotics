@@ -56,7 +56,7 @@ class ArduinoCommunicator(IArduino):
             self._active_thread = threading.Thread(target=self.handle_start)
             self._active_thread.start()
 
-            # self.handle_start()
+        # self.handle_start()
         # we want to handle the drop in a separate thread so we can kill it/reset if necessary.
         # otherwise we're stuck in concurrency.
         elif parts[0] == "DROP" and self._accept_moves and len(parts) == 2:
