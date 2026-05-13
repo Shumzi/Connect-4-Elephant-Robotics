@@ -10,6 +10,7 @@ breaked for 50min w bitbat
 - [X] drill holes - KINDA...
 - [ ] screw solenoids in place. might need more advice from ppl.
 - [ ] update solenoid pulsing code to make sure all pucks fall in. (esp. columns 1 and 2 that often don't fall fast enough).
+- (10.5.26) - left top column is too loose for 2 red puck on each other (get stuck). need another screw through all?
 # main game
 - update movement of robot in game to our calibrated sequences
 - update button press for light up then restart

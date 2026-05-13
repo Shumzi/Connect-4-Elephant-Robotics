@@ -37,9 +37,10 @@ const int DEBOUNCE_MS = 50;
 const int ms_to_reset = 2000; // no. of ms user needs to press button to reset the game.
 unsigned long lastResetSolenoids = 0;
 const int MAX_MS_TO_RESET_SOLENOIDS = 3000;
-const int PUCK_DROPTIME_MS = 30;
-const int COOLDOWN_PUCK_MS = 300;
-const int COOLDOWN_BETWEEN_COLUMNS_MS = 500;
+const int PUCK_DROPTIME_MS = 20;
+const int PUCK_LAST_DROPTIME_MS = 50;
+const int COOLDOWN_PUCK_MS = 400;
+const int COOLDOWN_BETWEEN_COLUMNS_MS = 600;
 unsigned long last_change_ms = 0;
 byte solenoid_state = 0;
 
@@ -223,7 +224,7 @@ void reset_solenoids(String stackSizes)
   bool customWait = false;
   if (stackSizes.length() > 0)
     customWait = true;
-  for (int i = 6; i >= 0 ; --i)
+  for (int i = 0; i < 7 ; ++i)
   {
     char msg[40];
     int pucksToRemove = 6;
@@ -233,13 +234,20 @@ void reset_solenoids(String stackSizes)
     Serial.println(msg);
     if (pucksToRemove > 0)
     {
-      for (int puckno = 0; puckno < pucksToRemove + 4; ++puckno)
+      for (int puckno = 0; puckno < pucksToRemove - 1; ++puckno)
       {
         writeToSr(1 << i);
         delay(PUCK_DROPTIME_MS);
         writeToSr(0);
         delay(COOLDOWN_PUCK_MS);
       }
+      writeToSr(1 << i);
+      delay(PUCK_LAST_DROPTIME_MS);
+      writeToSr(0);
+      delay(PUCK_LAST_DROPTIME_MS);
+      writeToSr(1 << i);
+      delay(PUCK_LAST_DROPTIME_MS);
+      writeToSr(0);
       delay(COOLDOWN_BETWEEN_COLUMNS_MS);
     }
   }
