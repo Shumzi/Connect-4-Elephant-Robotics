@@ -1,11 +1,4 @@
-current pomodoro - explain what's left in open-loop calibration.
 
-started ~1:30
-breaked for 50min w bitbat
-# calibration
-- reset red puck calibration - already made easier calibration seq.
-- if ylw stack misses sometimes - reset that too.
-- run overnight.
 # gutter
 - [X] drill holes - KINDA...
 - [ ] one more hole for the tl column (+ nut on other side)
@@ -27,3 +20,7 @@ breaked for 50min w bitbat
     - [X] cleanup arduino code
 - explain ocp structure + how to cmake the solver.
 - update todos in readme.md
+
+
+## quality of life stuff 
+- automatic identify ports so you don't need to do it yourself

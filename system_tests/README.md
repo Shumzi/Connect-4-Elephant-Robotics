@@ -2,17 +2,7 @@
 
 Run from **project root** (Connect-4-Robot).
 
-## 1. Game AI (text-only play)
-
-No Arduino or robot. Play Connect 4 against the AI in the terminal.
-
-```bash
-python -m system_tests.play_ai_text
-```
-
-Enter column 0–6 or `quit`. After each game you can play again.
-
-## 2. Robot location test
+## 1.calibrate robot locations
 
 Runs the arm through a safe sequence; after each step you enter **edit mode**:
 
@@ -27,6 +17,16 @@ Runs the arm through a safe sequence; after each step you enter **edit mode**:
 ```bash
 python -m system_tests.calibrate_robot_locations
 ```
+
+## 2.  Game AI (text-only play)
+
+No Arduino or robot. Play Connect 4 against the AI in the terminal.
+
+```bash
+python -m system_tests.play_ai_text
+```
+
+Enter column 0–6 or `quit`. After each game you can play again.
 
 ## 3. Arduino tests
 
