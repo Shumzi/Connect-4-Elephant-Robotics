@@ -30,10 +30,7 @@ The protocol is ASCII-based, with each command sent as a line terminated by `\n`
 **Format:**  
 `RESET`
 
-Resets the game board. Arduino should open all the solenoids to make all the pucks fall.
-
-**Response:**  
-- `OK` if reset was successful.
+Resets the game board. Arduino resets the board using solenoids.
 
 
 # error codes non existent for now.

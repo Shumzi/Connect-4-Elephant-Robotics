@@ -1,1 +1,0 @@
-describes pin connections between components that are connected to the arduino.

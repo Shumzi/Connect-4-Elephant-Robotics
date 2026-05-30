@@ -54,15 +54,15 @@ The system consists of three main controllers:
 - **API**: `drop_piece()`, `is_valid_move()`, `check_win()`, `is_draw()`, `get_state()`
 
 ### AI Engine (`core/ai.py`)
-- **Algorithm**: Minimax with alpha-beta pruning
+- **Algorithm**: Minimax with alpha-beta pruning (fully solved game)
 - **Input**: Board state as 2D array
 - **Output**: scores describing which puck drop from last will place the winning puck. positive score for the current player's win, negative for opponent. (see [article](http://blog.gamesolver.org/solving-connect-four/02-test-protocol/) for details).
 
 ### Arduino Interface (`hardware/arduino.py`)
 - **Responsibilities**: Serial communication, command sending, event callbacks
 #TODO: FIX COMMANDS, NOT UPDATED.
-- **Commands**: `RELEASE <col>`, `LED [ON/OFF]`, `RESET`, `STATUS`
-- **Events**: `DROP <col>` (puck detected), `START`, `LOG <msg>`
+- **Commands**: `RELEASE <col>`, `LED [ON/OFF]`, `RESET <BOARD_STATE>`
+- **Events**: `DROP <col>` (puck detected), `START` (user pressed btn), `LOG <msg>` (general logging)
 - **Thread Model**: Background listener thread for async event handling
 
 ### Robot Interface (`hardware/robot.py`)

@@ -1,10 +1,9 @@
-In this doc, we'll describe some of the main bugs we had during the development process and what we did to solve them.
+In this doc, I'll describe some of the main bugs we had during the development process and what we did to solve them. Towards the end this became a bit of a personal blog style :)
 
 # the ever-breaking pump
 the pump that is used to hold the pucks by suction kept having its gates broken. Possibly bc we connected the wires with a breadboard and the wires often were in the air, causing some weird voltage issues.
 Solution:
-1. Gave it to amir to fix a bunch of times
-2. try 
+1. Gave it to amir to fix a bunch of times, for final fix he did ask him & update this readme plz :)
 
 # non-deterministic slow robot movement
 at seemingly random, when we required a linear movement from the robot (e.g. for picking up pucks or placing them in the columns), the robot would generate some very slow and sometimes very wacky (in angles terms) positions, where the motors would move much more than another Inverse Kinematics (IK) solution could bring. It was clear we needed to rid ourselves of this. Solution:
@@ -18,6 +17,7 @@ the solenoids caused many headaches for our resident programmer wannabe-machanic
 solution:  
 1. swapped out the coils from some other set of solenoids we found that didn't have the correct pin size but still fit on the old one's casings.
 2. tested current draw on the coils, looks ok (~400mA on ~18v).
+3. springs gave up problems so we're swapping them for completely different ones w different dims as well :(
 
 ## puck jams
 The outer perspex pane of the board was warped (either because I screwed it in wrong or just over time), so when we tried releasing the pucks to the gutter they would often get stuck. Either they'd:  
@@ -27,7 +27,7 @@ The outer perspex pane of the board was warped (either because I screwed it in w
 
 Solution (in same order as problems):  
 1. Fastened the outer pane, first with clamps for an easy test, and soon by adding holes so the screws go through all 3 panes instead of just the inner 2.
-2. Albeit not the most elegant solution, but we pulse our opening and closing of solenoids so the pucks fall one at a time. So we didn't fix the whiplash problem (that'd require redisigning the gutter or adding more mechanisms), we just gave the pucks enough time so it doesn't matter.
+2. Albeit not the most elegant solution, but we pulse our opening and closing of solenoids so the pucks fall one at a time. So we didn't fix the whiplash problem (that'd require redisigning the gutter or adding more mechanisms), we just gave the pucks enough time so it doesn't matter. This requires us to depend on the solenoids more though, since now they need to pulse their open/close sequence accurately.
 3. Turns out the slide wasn't fully pushed into the third pane, so also here - add screws through all 3 panes.
 
 # General conclusions
@@ -42,8 +42,12 @@ Solution (in same order as problems):
 Other than that, there were multiple >5h sprints that were well spent - soldering stuff, reading code, building jigs, etc.
 In the end, I can't point to one thing that made the project taxing to work on. I can only point to momentum and how easy it is to work on it, and how defined my task is. So in conclusion: when working on a big project:
 1. Keep momentum running, even with small side tasks.
-2. Make the project easy for you to work on - make jigs, pcbs, helper code, sometimes spend more time on code when you see that manually doing the works is taxing. Often it'll pay off in absolute time as well.
+2. Make the project easy for you to work on - make jigs, pcbs, helper code, sometimes spend more time on code when you see that manually doing the work is taxing. Often it'll pay off in absolute time as well.
 3. make the tasks defined, if not it outcome then at least in time.
 4. Keep others in the loop, know to ask for help.
 
 assuming all this is done, big projects hopefully become a part of life and not a daily struggle.
+
+All the best 
+
+Ariel.

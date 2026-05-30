@@ -32,6 +32,11 @@ class Connect4Game:
         # possibly setup robot and arduino if not done elsewhere
 
     def interrupt(self):
+        """
+        mechanism for resetting the game mid-turn. 
+        NOTE: has not been tested and probably doesn't work yet :(
+        currently in "hachana lemazgan" mode.
+        """
         self.robot.killswitch.set()
 
     def game_start(self):
@@ -52,7 +57,7 @@ class Connect4Game:
         """
         self.logger.info(message)
         self.board.display()
-        self.arduino.reset(self.board.get_column_stack())
+        self.arduino.reset(self.board.get_column_heights())
         self.robot.reset()
         # Board and turns are not reset here so callers can detect winner/draw and show "Play again?".
         # They are reset in game_start() when starting a new game.
@@ -91,7 +96,6 @@ class Connect4Game:
         return False
     
     def ai_turn(self):
-        # AI's turn
         ai_column = self.ai.choose_move(self.board)
         self.robot.drop_piece(ai_column, self.turns_taken['ai'])
         self.turns_taken['ai'] += 1

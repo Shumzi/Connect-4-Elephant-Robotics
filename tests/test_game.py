@@ -7,6 +7,7 @@ from connect4_engine.hardware.mock import ArduinoDummy, RobotDummy
 from connect4_engine.core.board import Board
 
 
+
 def test_player_vertical_win_via_arduino(monkeypatch):
     arduino = ArduinoDummy()
     robot = RobotDummy(arduino)

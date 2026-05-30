@@ -47,6 +47,10 @@ class ArduinoCommunicator(IArduino):
 
     # this runs always, so if we want to restart we can.
     def _handle_line(self, line: str):
+        """
+        handle line in separate thread so we can keep on reading from the arduino.
+        NOTE: has not been tested yet.
+        """
         parts = line.split()
         if parts[0] == "START":
             # if start then game will killswitch the robot
