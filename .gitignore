@@ -214,3 +214,5 @@ connect4_engine/core/connect4ai/generator.o
 connect4_engine/core/connect4ai/main.o
 connect4_engine/core/connect4ai/Solver.o
 connect4_engine/core/connect4ai/connect4/nul
+Connect-4-Robot.code-workspace
+.vscode/tasks.json

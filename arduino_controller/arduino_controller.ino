@@ -21,7 +21,8 @@ void setup() {
 void loop() {
   handleDiscDetection();
   handleButtonPress();
-  periodicResetSolenoids();                  
+  periodicResetSolenoids();    
+  // periodicResetPump();
   if (Serial.available()) {
     handle_cmd(Serial.readStringUntil('\n'));
   }
