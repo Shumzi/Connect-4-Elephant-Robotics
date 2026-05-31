@@ -99,7 +99,7 @@ class Board:
 
     def is_player_winner(self, player):
         """
-        Check if the given player has won
+        Check if the given player has won by just checking the whole board.
         """
         board_state = np.array(self.grid)
         return any([
@@ -180,6 +180,9 @@ class Board:
         else:
             return round // 2, round // 2
 
-    def get_column_stack(self):
+    def get_column_heights(self) -> str:
+        """
+        get current amount of pucks in each column in string representation
+        """
         str_repr = np.array_str((self.grid != Board.P_EMPTY).sum(axis=0)) # e.g. '[1 2 0 3 1 0 2]'
         return str_repr[1::2] # take odd parts, i.e. '1203102'

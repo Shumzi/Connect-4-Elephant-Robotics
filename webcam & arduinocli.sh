@@ -26,6 +26,7 @@ arduino-cli board list          # find port (e.g. /dev/ttyUSB0 or /dev/ttyACM0)
 # general compiling:
 arduino-cli core install arduino:avr
 arduino-cli compile --upload -v -p /dev/ttyUSB0 --fqbn arduino:avr:nano my_sketch/
+alias acu='arduino-cli compile -b arduino:avr:nano -p /dev/ttyUSB0 -u -v'
 
 sudo apt install picocom # for interactive shell w arduino
 sudo apt-get install socat # for testing arduino commands without having a button or whatever

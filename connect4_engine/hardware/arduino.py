@@ -47,6 +47,10 @@ class ArduinoCommunicator(IArduino):
 
     # this runs always, so if we want to restart we can.
     def _handle_line(self, line: str):
+        """
+        handle line in separate thread so we can keep on reading from the arduino.
+        NOTE: has not been tested yet.
+        """
         parts = line.split()
         if parts[0] == "START":
             # if start then game will killswitch the robot
@@ -56,7 +60,7 @@ class ArduinoCommunicator(IArduino):
             self._active_thread = threading.Thread(target=self.handle_start)
             self._active_thread.start()
 
-            # self.handle_start()
+        # self.handle_start()
         # we want to handle the drop in a separate thread so we can kill it/reset if necessary.
         # otherwise we're stuck in concurrency.
         elif parts[0] == "DROP" and self._accept_moves and len(parts) == 2:
@@ -90,6 +94,12 @@ class ArduinoCommunicator(IArduino):
         else:
             self.send_message("RESET")
         self._accept_moves = False
+    
+    def turn_on_solenoid(self, solNo):
+        self.send_message(f"OPEN {solNo}")
+
+    def turn_off_solenoids(self):
+        self.send_message("CLOSE")
 
     @timed
     def turn_on_pump(self):

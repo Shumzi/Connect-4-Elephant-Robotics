@@ -16,8 +16,7 @@ class Main:
         self.game = Connect4Game(arduino=self.arduino, robot=self.robot, player_starts=False)
     
     def play(self):
-        self.arduino.read_loop()  # in real hardware this would be the only thing running.
-
+        self.arduino.read_loop() 
     
 if __name__ == "__main__":
     m = Main()

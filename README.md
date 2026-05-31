@@ -1,6 +1,16 @@
 # Connect 4 Robot
 
-A robotic Connect 4 game where a MyCobot 280 robot arm plays against a human player. The system uses drop detection via LED strip sensors, automated puck dispensing with solenoids, and AI-powered gameplay.
+A robotic Connect 4 game where a MyCobot 280 robot arm plays against a human player. The system uses drop detection via LED strip photoresistors, automated puck dispensing with solenoids, and [PascalPons's connect 4 solver](https://github.com/PascalPons/connect4) for the AI. 
+
+## Quick Setup
+the installation assumes you're using a RaspberryPi for the pc.
+1. `chmod +x setup.sh && ./setup.sh`
+2. go to `arduino_controller` and burn the code onto an arduino nano.
+the rest of the setup (connectors etc.) will be described in the project word doc.
+
+## Useful Files:
+- `serial_middleman.py` - lets you inject commands to the arduino from the pc and vice versa, for testing.
+
 
 ## System Overview
 
@@ -19,8 +29,7 @@ A robotic Connect 4 game where a MyCobot 280 robot arm plays against a human pla
      │  Robot   │ │   Arduino      │
      │  Arm     │ │ - LED Strip    │
      │  (via    │ | - Solenoids    │
-     │pymycobot)│ │ - Sensors      |
-     │          | | - Robot Pump   |
+     │pymycobot)│ │ - Robot Pump   |
      └──────────┘ └────────────────┘
 ```
 
@@ -28,11 +37,11 @@ A robotic Connect 4 game where a MyCobot 280 robot arm plays against a human pla
 
 The system consists of three main controllers:
 
-1. **PC Main Controller** - Orchestrates gameplay, runs AI, manages state
+1. **PC Main Controller** - Orchestrates gameplay, runs AI, manages state. Located at connect4_engine.
 2. **Arduino Controller** - Handles LED strip, solenoid puck release, drop detection sensors, pump activation
-3. **MyCobot 280 Robot Arm** - Picks and places pucks (using arduino pump), delivers pucks to player
+3. **MyCobot 280 Robot Arm** - Picks pucks from stack and places them in columns (using arduino pump), delivers pucks to player at dropoff location.
 
-## Key Components
+## Key Components (located in `connect4_engine`)
 
 ### Game Logic (`game.py`)
 - **Responsibilities**: Orchestrate turns, check win/draw, trigger robot moves
@@ -45,40 +54,25 @@ The system consists of three main controllers:
 - **API**: `drop_piece()`, `is_valid_move()`, `check_win()`, `is_draw()`, `get_state()`
 
 ### AI Engine (`core/ai.py`)
-- **Algorithm**: Minimax with alpha-beta pruning
+- **Algorithm**: Minimax with alpha-beta pruning (fully solved game)
 - **Input**: Board state as 2D array
-- **Output**: Best column to play (0-6)
-- **Configurable**: Search depth adjustable via `config.yaml`
+- **Output**: scores describing which puck drop from last will place the winning puck. positive score for the current player's win, negative for opponent. (see [article](http://blog.gamesolver.org/solving-connect-four/02-test-protocol/) for details).
 
 ### Arduino Interface (`hardware/arduino.py`)
 - **Responsibilities**: Serial communication, command sending, event callbacks
-- **Commands**: `RELEASE:<col>`, `LED:[ON/OFF]`, `RESET`, `STATUS`
-- **Events**: `DROP:<col>` (puck detected), `READY`, `ERROR:<msg>`
+#TODO: FIX COMMANDS, NOT UPDATED.
+- **Commands**: `RELEASE <col>`, `LED [ON/OFF]`, `RESET <BOARD_STATE>`
+- **Events**: `DROP <col>` (puck detected), `START` (user pressed btn), `LOG <msg>` (general logging)
 - **Thread Model**: Background listener thread for async event handling
 
 ### Robot Interface (`hardware/robot.py`)
-- **Wrapper**: Clean API around legacy `ArmInterface.py`
-- **Methods**: `place_puck_at_column(col)`, `give_player_puck()`, `move_to_home()`
-- **Position Management**: Loads calibrated positions from `positions.json`
+- moves robot to specified locations calibrated from `system_tests\calibrate_robot_locations.py`, using angle coords exclusively to make sure movements are deterministic.
 
 ### Mock Hardware (`hardware/mock.py`)
 - **Purpose**: Enable development/testing without physical hardware
 - **Classes**: `MockArduino`, `MockRobot`
-- **Usage**: Set `simulation: true` in `config.yaml`
+- **note**: not fully supported anymore since we started testing on the full robot.
 
-
-## Setup
-
-### Prerequisites
-
-- **Hardware** (for production use):
-  - MyCobot 280 robot arm (M5 Stack version)
-  - Arduino with custom PCB (LED strip + solenoid drivers + sensors)
-  - USB connections for both
-  
-- **Software**:
-  - Python 3.8+
-  - Arduino IDE (for firmware upload)
 
 ## How to Play
 
@@ -87,6 +81,5 @@ The system consists of three main controllers:
 3. Player drops puck in any column (detected by LED strip sensor)
 4. PC calculates best move and robot executes (picks red puck, drops in column)
 5. Robot returns and gives next yellow puck to player
-6. Repeat until someone wins or board is full
+6. Repeat until someone wins, board is full or player long presses reset button. 
 7. System displays winner via XXX??? and resets for new game
-
