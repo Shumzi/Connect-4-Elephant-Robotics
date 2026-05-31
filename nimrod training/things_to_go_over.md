@@ -15,6 +15,10 @@
 - how to compile code in c if needed
 - [github wiki](github.com/jerusalem-science-museum/.github/wiki) - mostly for setting up a new pc/rpi.
 - robot jig
+- useful addons:
+    - black formatter
+    - vscode-pdf
+- arduino situation & how to upload to ard from rpi.
 run through
 לעבור על הרידמיז ולעדכן בהתאם
 למחוק קבצים ל"ר אם אפשר
