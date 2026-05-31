@@ -46,7 +46,7 @@
             "name": "System test: Play AI (text)",
             "type": "debugpy",
             "request": "launch",
-            "module": "system_tests.play_ai_text",
+            "module": "scripts.play_ai_text",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
         },
@@ -54,7 +54,7 @@
             "name": "System test: Robot locations",
             "type": "debugpy",
             "request": "launch",
-            "module": "system_tests.calibrate_robot_locations",
+            "module": "scripts.calibrate_robot_locations",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
         },        
@@ -62,7 +62,7 @@
             "name": "System test: Solenoids",
             "type": "debugpy",
             "request": "launch",
-            "module": "system_tests.solenoid_tester",
+            "module": "scripts.solenoid_tester",
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
         },
@@ -70,7 +70,7 @@
             "name": "System test: Arduino LED",
             "type": "debugpy",
             "request": "launch",
-            "module": "system_tests.test_arduino",
+            "module": "scripts.test_arduino",
             "args": ["led", "--port", "COM5"],
             "cwd": "${workspaceFolder}",
             "console": "integratedTerminal"
