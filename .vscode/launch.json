@@ -1,0 +1,80 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python Debugger: MAIN",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "connect4_engine.main"
+        },
+        {
+            "name": "Python Debugger: Current File",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Pytest: current file",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "pytest",
+            "args": [
+                "${file}"
+            ],
+            "console": "integratedTerminal",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder};${workspaceFolder}\\connect4_engine"
+            },
+            "justMyCode": true
+        },
+        {
+            "name": "Python Debugger: connect4_engine (run selected file)",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${file}",
+            "cwd": "${workspaceFolder}/connect4_engine",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}:${workspaceFolder}/connect4_engine"
+            },
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "System test: Play AI (text)",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "system_tests.play_ai_text",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "System test: Robot locations",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "system_tests.calibrate_robot_locations",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },        
+        {
+            "name": "System test: Solenoids",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "system_tests.solenoid_tester",
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "System test: Arduino LED",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "system_tests.test_arduino",
+            "args": ["led", "--port", "COM5"],
+            "cwd": "${workspaceFolder}",
+            "console": "integratedTerminal"
+            
+        }
+    ]
+}
