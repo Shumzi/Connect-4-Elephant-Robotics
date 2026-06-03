@@ -41,6 +41,72 @@ The system consists of three main controllers:
 2. **Arduino Controller** - Handles LED strip, solenoid puck release, drop detection sensors, pump activation
 3. **MyCobot 280 Robot Arm** - Picks pucks from stack and places them in columns (using arduino pump), delivers pucks to player at dropoff location.
 
+## OCP Structure (`connect4_engine`)
+
+```mermaid
+classDiagram
+    class IArduino {
+        <<interface>>
+        +set_on_puck_dropped_callback()
+        +set_game_start_callback()
+        +reset()
+    }
+    class IRobot {
+        <<interface>>
+        +drop_piece(column, puck_no)
+        +give_player_puck(puck_no)
+        +reset()
+    }
+
+    class ArduinoCommunicator {
+        +read_loop()
+        +send_message()
+    }
+    class ArduinoDummy {
+        +puck_dropped_in_col()
+    }
+
+    class RobotCommunicator {
+        +drop_piece()
+        +give_player_puck()
+        %% Arm positions come from coords.json, calibrated via
+        %% system_tests/test_robot_locations.py before use
+    }
+    class RobotDummy
+
+    class AIPascalPons {
+        +choose_move(board)
+        %% Wraps c4solver binary via subprocess (stdin/stdout)
+    }
+
+    class Board {
+        +drop_piece()
+        +is_player_winner()
+        +is_draw()
+    }
+
+    class Connect4Game {
+        +game_start()
+        +piece_dropped_in_board()
+        +ai_turn()
+        +game_over()
+    }
+
+    IArduino <|-- ArduinoCommunicator : implements
+    IArduino <|-- ArduinoDummy : implements (mock)
+    IRobot <|-- RobotCommunicator : implements
+    IRobot <|-- RobotDummy : implements (mock)
+
+    Connect4Game --> IArduino : uses
+    Connect4Game --> IRobot : uses
+    Connect4Game --> Board : owns
+    Connect4Game --> AIPascalPons : owns
+
+    RobotCommunicator --> IArduino : uses (pump control)
+```
+
+> **Calibration note:** `RobotCommunicator` drives arm movement purely by joint angles stored in `angles.json`. Before running the full game, run `system_tests/test_robot_locations.py` to interactively adjust and save those positions — without this step the arm won't reach puck stacks or board columns accurately.
+
 ## Key Components (located in `connect4_engine`)
 
 ### Game Logic (`game.py`)
@@ -60,8 +126,7 @@ The system consists of three main controllers:
 
 ### Arduino Interface (`hardware/arduino.py`)
 - **Responsibilities**: Serial communication, command sending, event callbacks
-#TODO: FIX COMMANDS, NOT UPDATED.
-- **Commands**: `RELEASE <col>`, `LED [ON/OFF]`, `RESET <BOARD_STATE>`
+- **Commands**: `OPEN <col>`, `CLOSE`, `LED [ON/OFF/STROBE]`, `RESET <BOARD_STATE>`
 - **Events**: `DROP <col>` (puck detected), `START` (user pressed btn), `LOG <msg>` (general logging)
 - **Thread Model**: Background listener thread for async event handling
 

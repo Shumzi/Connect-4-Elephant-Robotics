@@ -38,10 +38,10 @@ def calibrate_puck_stack(robot: RobotCommunicator, coord_json, angles_json, clr=
     steps = []
     steps.append((f"discard-puck", "coords", ("angle_table", "discard-puck")))
     steps.append((f"stack-{clr}-start", "coords", ("angle_table", f"stack-{clr}-0")))
-    steps.append((f"stack-{clr}-end", "coords", ("angle_table", f"stack-{clr}-20")))
-    robot.send_coords(angles_json["angle_table"]["discard-puck"], 100)
+    steps.append((f"stack-{clr}-end", "forward-coords", ("angle_table", f"stack-{clr}-20")))
+    robot.send_coords(coord_json["angle_table"]["discard-puck"], 100)
     edit_mode_loop(robot, coord_json, angles_json, steps[0], json_path=DEFAULT_JSON_PATH, step_index=1)
-    robot.send_coords(angles_json["angle_table"][f"stack-{clr}-start"], 100)
+    robot.send_coords(coord_json["angle_table"][f"stack-hover-{clr}"], 100)
     edit_mode_loop(robot, coord_json, angles_json, steps[1], json_path=DEFAULT_JSON_PATH, step_index=1)
     robot.release_servos()
     inp = input('starting discard sequence')
