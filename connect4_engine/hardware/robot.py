@@ -40,14 +40,15 @@ class IRobot(ABC):
     def reset(self):
         pass
 
-
+# TODO: can probably remove the coord_json attribute (verify before) 
+#       and replace with angles_json (make sure we call the correct method for angles of MYCobot)
 class RobotCommunicator(IRobot):
     def __init__(
         self,
         com_port: str | None,
-        pump: Arduino = None,
-        coord_json: dict = None,
-        json_path: str = None,
+        pump: Arduino,
+        coord_json: dict | None = None,
+        json_path: str | None = None,
     ):
         if pump is None:
             raise ValueError("pump must be provided")
@@ -98,11 +99,12 @@ class RobotCommunicator(IRobot):
         if direction == "backwards":
             angles = angles[::-1]
         for step in angles:
+            # TODO: can call self.send_angle() here instead of this code:
             self.mc.sync_send_angles(step, speed, self.MOVE_TIMEOUT)
             for tries in range(3):
                 self.check_exit()
                 if not self.mc.is_in_position(step, 0):
-                    self.mc.sync_send_angles(step, speed, self.MOVE_TIMEOUT)
+                    self.mc.sync_send_coords(step, speed, self.MOVE_TIMEOUT)
             if self.pause_between_moves:
                 input("press <Enter> to proceed.")
 

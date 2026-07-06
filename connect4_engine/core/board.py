@@ -54,11 +54,7 @@ class Board:
         """
         Return the symbol to check for a win condition based on the player
         """
-        if player == self.P_RED:
-            check = "1 1 1 1"
-        else:
-            check = "2 2 2 2"
-        return check
+        return f"{player} {player} {player} {player}"
 
     def _check_vertical_win(self, board_state, player):
         """

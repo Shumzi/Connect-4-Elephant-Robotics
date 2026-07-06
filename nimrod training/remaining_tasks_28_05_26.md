@@ -14,15 +14,18 @@ currently testing a new solenoids (& different dimensions). starting with changi
 - [ ] recalibrate red puck sequence
 
 # main game
-- update movement of robot in game to our calibrated sequences (i.e. update robot.py to use the locations from angles.json)
-- update button press for light up then restart
-    - on getting start from thread, need to have it kill the existing game..?
-- meeting to decide how to reset (or just decide yourself)
-- request explanation graphic of "press x seconds to reset" from amir/nevo (the graphic designer).
+- [ ] update movement of robot in game to our calibrated sequences (i.e. update robot.py to use the locations from angles.json)
+- [ ] update button press for light up then restart
+- [ ] on getting start from thread, need to have it kill the existing game..?
+- [ ] meeting to decide how to reset (or just decide yourself)
+- [ ] request explanation graphic of "press x seconds to reset" from amir/nevo (the graphic designer).
+- [ ] re-write the turn logic in game.py, it is a bit weird at the moment and could be more clear and percise.
+
 # future calibration - meeting w amir, his choice.
 - ideas -
     - recalibrate zero positions
     - make some homing location for the robot.
+
 # cleanup
 - new non-gpt-ish readme.
 
