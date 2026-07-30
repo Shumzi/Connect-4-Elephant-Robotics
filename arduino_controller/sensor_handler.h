@@ -39,7 +39,7 @@ const int ms_to_reset_game = 2000; // ms use has to press button till game is re
 
 // Solenoid (gutter) variables
 unsigned long lastResetSolenoids = 0; // used for resetting gutter solenoids.
-const int MAX_MS_TO_RESET_SOLENOIDS = 3000; // resetting gutter solenoids after this amount of ms.
+const int MAX_MS_TO_RESET_SOLENOIDS = 2000; // resetting gutter solenoids after this amount of ms.
 const int PUCK_DROPTIME_MS = 20;
 const int PUCK_LAST_DROPTIME_MS = 50;  // time to keep solenoid open for letting puck drop from column to gutter.
 const int COOLDOWN_PUCK_MS = 400; //  time to wait after closing solenoid to roll into slide 
@@ -253,34 +253,48 @@ void periodicResetSolenoids()
 
 void reset_solenoids(String stackSizes)
 {
+  int numCols = 7;
+  int midColIdx = numCols / 2;
   bool customWait = false;
+
   if (stackSizes.length() > 0)
     customWait = true;
-  for (int i = 0; i < 7 ; ++i)
+  
+  for (int i = 0; i < numCols ; ++i)
   {
     char msg[40];
     int pucksToRemove = 6;
+    // calculate column idx to remove pucks from, starting from the middle and alternating left and right:
+    int offset = (i + 1) / 2;
+    int curColIdx = midColIdx + (i % 2 == 0 ? -offset : offset);
+
     if (customWait)
-      pucksToRemove = stackSizes.substring(i, i + 1).toInt(); // take the current puck stack size and apply to multiplier
-    sprintf(msg, "LOG turn off solenoid %d for %d pucks", i, pucksToRemove);
+      // take the current puck stack size and apply to multiplier:
+      pucksToRemove = stackSizes.substring(curColIdx, curColIdx + 1).toInt();
+    sprintf(msg, "LOG turn off solenoid %d for %d pucks", curColIdx, pucksToRemove);
     Serial.println(msg);
+    
     if (pucksToRemove > 0)
     {
-      for (int puckno = 0; puckno < pucksToRemove - 1; ++puckno)
-      {
-        writeToSr(1 << i);
-        delay(PUCK_DROPTIME_MS);
-        writeToSr(0);
-        delay(COOLDOWN_PUCK_MS);
-      }
-      writeToSr(1 << i);
-      delay(PUCK_LAST_DROPTIME_MS);
-      writeToSr(0);
-      delay(PUCK_LAST_DROPTIME_MS);
-      writeToSr(1 << i);
-      delay(PUCK_LAST_DROPTIME_MS);
+      writeToSr(1 << curColIdx);
+      delay(COOLDOWN_PUCK_MS * pucksToRemove);
       writeToSr(0);
       delay(COOLDOWN_BETWEEN_COLUMNS_MS);
+      // for (int puckno = 0; puckno < pucksToRemove - 1; ++puckno)
+      // {
+      //   writeToSr(1 << curColIdx);
+      //   delay(PUCK_DROPTIME_MS);
+      //   writeToSr(0);
+      //   delay(COOLDOWN_PUCK_MS);
+      // }
+      // writeToSr(1 << curColIdx);
+      // delay(PUCK_LAST_DROPTIME_MS);
+      // writeToSr(0);
+      // delay(PUCK_LAST_DROPTIME_MS);
+      // writeToSr(1 << curColIdx);
+      // delay(PUCK_LAST_DROPTIME_MS);
+      // writeToSr(0);
+      // delay(COOLDOWN_BETWEEN_COLUMNS_MS);
     }
   }
   // fast sequence to make sure solenoids close (open and close each solenoid a bunch of times)
