@@ -54,26 +54,28 @@ class RobotCommunicator(IRobot):
             raise ValueError("pump must be provided")
         self.pump = pump
         self.mc = MyCobot280(com_port)
-        if coord_json is not None:
-            self.coord_json = coord_json
-        elif json_path is not None:
-            with open(json_path, "r") as f:
-                self.coord_json = json.load(f)
-        self.angles_json = json.load(open("connect4_engine/hardware/angles.json"))
-        self.ARM_SPEED = 100
-        self.ARM_SPEED_PRECISE = 50
-        self.MOVE_TIMEOUT = 1
-        self.killswitch = threading.Event()
+        # if coord_json is not None:
+        #     self.coord_json = coord_json
+        # elif json_path is not None:
+        #     with open(json_path, "r") as f:
+        #         self.coord_json = json.load(f)
         robo_config = get_config()["hardware"]["robot"]
+        with open(robo_config["angles_file"], "r") as angles_file:
+            angles_json = json.load(angles_file)
+        self.arm_speed = robo_config["arm_speed"]
+        self.arm_speed_percise = robo_config["arm_speed_percise"]
+        self.move_timeout = robo_config["move_timeout"]
+        self.killswitch = threading.Event()
+        
         self.pause_between_moves = robo_config["pause_between_moves"]
         # Define angle tables for different positions
-        self.angle_table = self.angles_json["angle_table"]
+        self.angle_table = angles_json["angle_table"]
 
         # Define chess table for different positions
-        self.chess_table = self.angles_json["chess_table"]
+        self.chess_table = angles_json["chess_table"]
 
         # Define drop table for different positions
-        self.drop_table = self.angles_json["drop_table"]
+        self.drop_table = angles_json["drop_table"]
 
     def send_angles(self, angles, speed, direction="forwards"):
         if any(isinstance(item, list) for item in angles):
@@ -83,37 +85,36 @@ class RobotCommunicator(IRobot):
 
     def send_angle(self, angle, speed):
         self.check_exit()
-        self.mc.sync_send_angles(angle, speed, self.MOVE_TIMEOUT)
+        self.mc.sync_send_angles(angle, speed, self.move_timeout)
         for tries in range(3):
             self.check_exit()
             if not self.mc.is_in_position(angle, 0):
-                self.mc.sync_send_angles(angle, speed, self.MOVE_TIMEOUT)
+                self.mc.sync_send_angles(angle, speed, self.move_timeout)
         if self.pause_between_moves:
             input("press <Enter> to proceed.")
 
     """
     go through a sequence of angles (some saved linear motion sequence).
     """
-
     def send_angle_sequence(self, angles, speed, direction):
         if direction == "backwards":
             angles = angles[::-1]
-        for step in angles:
-            # TODO: can call self.send_angle() here instead of this code:
-            self.mc.sync_send_angles(step, speed, self.MOVE_TIMEOUT)
-            for tries in range(3):
-                self.check_exit()
-                if not self.mc.is_in_position(step, 0):
-                    self.mc.sync_send_coords(step, speed, self.MOVE_TIMEOUT)
-            if self.pause_between_moves:
-                input("press <Enter> to proceed.")
+        for angle in angles:
+            self.send_angle(angle, speed)
+            # self.mc.sync_send_angles(angle, speed, self.move_timeout)
+            # for tries in range(3):
+            #     self.check_exit()
+            #     if not self.mc.is_in_position(angle, 0):
+            #         self.mc.sync_send_coords(angle, speed, self.move_timeout)
+            # if self.pause_between_moves:
+            #     input("press <Enter> to proceed.")
 
     # check if you should ky
     def check_exit(self):
         if self.killswitch.is_set():
             logger.error("thread requested exit, going back to observe and exit.")
             # TODO: return puck to place if i'm still holding something.
-            self.mc.sync_send_coords(self.angle_table["observe"], self.ARM_SPEED)
+            self.mc.sync_send_coords(self.angle_table["observe"], self.arm_speed)
             self.killswitch.clear()
             logger.error("exit robot thread")
             raise SystemExit
@@ -132,17 +133,16 @@ class RobotCommunicator(IRobot):
         """
         logger.debug(f"GOING TO {target_coords}")
         self.check_exit()
-        self.mc.sync_send_coords(target_coords, speed, 0, self.MOVE_TIMEOUT)
+        self.mc.sync_send_coords(target_coords, speed, 0, self.move_timeout)
 
     """
     go through a sequence of coords (some saved linear motion sequence).
     """
-
     def send_coords_sequence(self, target_coords, speed, direction="forwards"):
         if direction == "backwards":
             target_coords = target_coords[::-1]
         for step in target_coords:
-            self.mc.sync_send_coords(step, speed, 0, self.MOVE_TIMEOUT)
+            self.mc.sync_send_coords(step, speed, 0, self.move_timeout)
             if self.pause_between_moves:
                 input("press <Enter> to proceed.")
 
@@ -189,31 +189,31 @@ class RobotCommunicator(IRobot):
         """Re-engage servos at current position (call after release_servos)."""
         angles = self.get_current_angles()
         if angles is not None and len(angles) == 6:
-            self.send_angles(angles, self.ARM_SPEED)
+            self.send_angles(angles, self.arm_speed)
 
     # Method to pass to the prepare position
     def prepare(self):
-        self.send_angles(self.angle_table["prepare"], self.ARM_SPEED)
+        self.send_angles(self.angle_table["prepare"], self.arm_speed)
 
     # Method to return to the initial position
     def recovery(self):
-        self.send_angles(self.angle_table["recovery"], self.ARM_SPEED)
+        self.send_angles(self.angle_table["recovery"], self.arm_speed)
 
     # Method to move to the top of the left discs stack
     def hover_over_stack_red(self):
-        self.send_coords(self.angle_table["stack-hover-red"], self.ARM_SPEED_PRECISE)
+        self.send_coords(self.angle_table["stack-hover-red"], self.arm_speed_percise)
 
     # Method to move to in front of left discs stack
     def apro_stack_red(self):
-        self.send_coords(self.angle_table["stack-apro-red"], self.ARM_SPEED)
+        self.send_coords(self.angle_table["stack-apro-red"], self.arm_speed)
 
     # Method to move to the top of the right disks stack
     def hover_over_stack_yellow(self):
-        self.send_coords(self.angle_table["stack-hover-ylw"], self.ARM_SPEED_PRECISE)
+        self.send_coords(self.angle_table["stack-hover-ylw"], self.arm_speed_percise)
 
     # Method to move to in front of right discs stack
     def apro_stack_yellow(self):
-        self.send_coords(self.angle_table["stack-apro-ylw"], self.ARM_SPEED)
+        self.send_coords(self.angle_table["stack-apro-ylw"], self.arm_speed)
 
     def _pump_on(self):
         print("pump on")
@@ -249,28 +249,28 @@ class RobotCommunicator(IRobot):
     # we precompute all locations in system_tests/calibrate_robot_locations.py
     def get_disc(self, counter: int, clr: str):
         self.target_angles = self.angle_table[f"stack-{clr}-{counter}"]
-        self.send_angles(self.target_angles, self.ARM_SPEED)
+        self.send_angles(self.target_angles, self.arm_speed)
         self._pump_on()
         time.sleep(1)
         self._pump_off()
-        self.send_angles(self.target_angles, self.ARM_SPEED, direction="backwards")
+        self.send_angles(self.target_angles, self.arm_speed, direction="backwards")
 
     # Method to move to the handover window and drop the disk
     def drop_in_window(self):
         # logger.debug("droping disc in window")
-        self.send_coords(self.angle_table["handover-window"], self.ARM_SPEED)
-        self.send_coords(self.angle_table["in-window"], self.ARM_SPEED)
+        self.send_coords(self.angle_table["handover-window"], self.arm_speed)
+        self.send_coords(self.angle_table["in-window"], self.arm_speed)
         self.pump_release_and_off()
-        self.send_coords(self.angle_table["handover-window"], self.ARM_SPEED)
+        self.send_coords(self.angle_table["handover-window"], self.arm_speed)
 
     # Method to move to the top of the chessboard
     def hover_over_chessboard_n(self, n: int):
         if n is not None and 0 <= n <= 6:
             # logger.debug(f"Move to chess position {n}, Coords: {self.chess_table[n]}")
-            self.send_coords(self.chess_table[n], self.ARM_SPEED)
-            self.send_coords(self.drop_table[n], self.ARM_SPEED)
+            self.send_coords(self.chess_table[n], self.arm_speed)
+            self.send_coords(self.drop_table[n], self.arm_speed)
             self.pump_release_and_off()
-            self.send_coords(self.chess_table[n], self.ARM_SPEED)
+            self.send_coords(self.chess_table[n], self.arm_speed)
         else:
             self.pump_release_and_off()
             raise Exception(
@@ -280,7 +280,7 @@ class RobotCommunicator(IRobot):
     # Method to move to the observation posture
     def observe_posture(self):
         print(f"Move to observe position {self.angle_table['observe']}")
-        self.send_angles(self.angle_table["observe"], self.ARM_SPEED)
+        self.send_angles(self.angle_table["observe"], self.arm_speed)
 
     def drop_piece(self, column: int, puck_no: int):
         self.prepare()

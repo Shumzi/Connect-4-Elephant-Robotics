@@ -8,8 +8,11 @@ hardware:
   robot:
     portwin: "COM5"  # or load from config
     portlinux: "/dev/ttyACM0"
-    angles_file: "robot_arm/robot_angles.json"  # path relative to project root
+    angles_file: "connect4_engine/hardware/angles.json"  # path relative to project root
     pause_between_moves: false
+    arm_speed: 100
+    arm_speed_percise: 50
+    move_timeout: 1
   arduino:
     portwin: "COM6"
     portlinux:  "/dev/pts/3" # "/dev/ttyUSB0" ] # try the virtual connection first, then the real one.
