@@ -279,6 +279,7 @@ void reset_solenoids(String stackSizes)
       writeToSr(1 << curColIdx);
       delay(COOLDOWN_PUCK_MS);
       writeToSr(0);
+      delay(COOLDOWN_PUCK_MS);
       writeToSr(1 << curColIdx);
       delay(COOLDOWN_PUCK_MS);
       writeToSr(0);
