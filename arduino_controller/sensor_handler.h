@@ -279,9 +279,9 @@ void reset_solenoids(String stackSizes)
       for (int puckno = 0; puckno < pucksToRemove; ++puckno)
       {
         writeToSr(1 << curColIdx);
-        delay(150);
+        delay(100);
         writeToSr(0);
-        delay(600);
+        delay(650);
       }
       // writeToSr(1 << curColIdx);
       // delay(PUCK_LAST_DROPTIME_MS);
