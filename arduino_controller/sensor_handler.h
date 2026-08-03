@@ -44,7 +44,7 @@ const int PUCK_DROPTIME_MS = 20;
 const int PUCK_LAST_DROPTIME_MS = 50;  // time to keep solenoid open for letting puck drop from column to gutter.
 const int COOLDOWN_PUCK_MS = 400; //  time to wait after closing solenoid to roll into slide 
                                   // (avoid whiplash effect of puck going up then other puck gets stuck on it.)
-const int COOLDOWN_BETWEEN_COLUMNS_MS = 700;  // time to wait between columns (add a bit just for safety)
+const int COOLDOWN_BETWEEN_COLUMNS_MS = 600;  // time to wait between columns (add a bit just for safety)
 
 // pump variables
 unsigned long pumpStartTime = 0;
@@ -281,7 +281,7 @@ void reset_solenoids(String stackSizes)
         writeToSr(1 << curColIdx);
         delay(150);
         writeToSr(0);
-        delay(500);
+        delay(600);
       }
       // writeToSr(1 << curColIdx);
       // delay(PUCK_LAST_DROPTIME_MS);
