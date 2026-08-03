@@ -281,7 +281,7 @@ void reset_solenoids(String stackSizes)
         writeToSr(1 << curColIdx);
         delay(100);
         writeToSr(0);
-        delay(650);
+        delay(700);
       }
       // writeToSr(1 << curColIdx);
       // delay(PUCK_LAST_DROPTIME_MS);
