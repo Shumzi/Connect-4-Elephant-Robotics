@@ -40,11 +40,9 @@ const int ms_to_reset_game = 2000; // ms use has to press button till game is re
 // Solenoid (gutter) variables
 unsigned long lastResetSolenoids = 0; // used for resetting gutter solenoids.
 const int MAX_MS_TO_RESET_SOLENOIDS = 2000; // resetting gutter solenoids after this amount of ms.
-const int PUCK_DROPTIME_MS = 20;
-const int PUCK_LAST_DROPTIME_MS = 50;  // time to keep solenoid open for letting puck drop from column to gutter.
-const int COOLDOWN_PUCK_MS = 400; //  time to wait after closing solenoid to roll into slide 
-                                  // (avoid whiplash effect of puck going up then other puck gets stuck on it.)
-const int COOLDOWN_BETWEEN_COLUMNS_MS = 600;  // time to wait between columns (add a bit just for safety)
+const int PUCK_DROPTIME_MS = 100;  // time to keep solenoid open for letting puck drop from column to gutter
+const int COOLDOWN_PUCK_MS = 700; //  time to wait after closing solenoid to prevent gutter clutter 
+const int COOLDOWN_BETWEEN_COLUMNS_MS = 600;  // time to wait between columns
 
 // pump variables
 unsigned long pumpStartTime = 0;
@@ -279,17 +277,10 @@ void reset_solenoids(String stackSizes)
       for (int puckno = 0; puckno < pucksToRemove; ++puckno)
       {
         writeToSr(1 << curColIdx);
-        delay(100);
+        delay(PUCK_DROPTIME_MS);
         writeToSr(0);
-        delay(700);
+        delay(COOLDOWN_PUCK_MS);
       }
-      // writeToSr(1 << curColIdx);
-      // delay(PUCK_LAST_DROPTIME_MS);
-      // writeToSr(0);
-      // delay(PUCK_LAST_DROPTIME_MS);
-      // writeToSr(1 << curColIdx);
-      // delay(PUCK_LAST_DROPTIME_MS);
-      // writeToSr(0);
       delay(COOLDOWN_BETWEEN_COLUMNS_MS);
     }
   }
