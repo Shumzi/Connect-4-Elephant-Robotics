@@ -277,11 +277,15 @@ void reset_solenoids(String stackSizes)
     if (pucksToRemove > 0)
     {
       writeToSr(1 << curColIdx);
-      delay(COOLDOWN_PUCK_MS);
+      delay(150);
       writeToSr(0);
       delay(COOLDOWN_PUCK_MS);
       writeToSr(1 << curColIdx);
+      delay(150);
+      writeToSr(0);
       delay(COOLDOWN_PUCK_MS);
+       writeToSr(1 << curColIdx);
+      delay(150);
       writeToSr(0);
       delay(COOLDOWN_BETWEEN_COLUMNS_MS);
       // for (int puckno = 0; puckno < pucksToRemove; ++puckno)
