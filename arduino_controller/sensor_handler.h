@@ -276,25 +276,25 @@ void reset_solenoids(String stackSizes)
     
     if (pucksToRemove > 0)
     {
-      writeToSr(1 << curColIdx);
-      delay(COOLDOWN_PUCK_MS * pucksToRemove);
-      writeToSr(0);
-      delay(COOLDOWN_BETWEEN_COLUMNS_MS);
-      // for (int puckno = 0; puckno < pucksToRemove - 1; ++puckno)
-      // {
-      //   writeToSr(1 << curColIdx);
-      //   delay(PUCK_DROPTIME_MS);
-      //   writeToSr(0);
-      //   delay(COOLDOWN_PUCK_MS);
-      // }
       // writeToSr(1 << curColIdx);
-      // delay(PUCK_LAST_DROPTIME_MS);
-      // writeToSr(0);
-      // delay(PUCK_LAST_DROPTIME_MS);
-      // writeToSr(1 << curColIdx);
-      // delay(PUCK_LAST_DROPTIME_MS);
+      // delay(COOLDOWN_PUCK_MS * pucksToRemove);
       // writeToSr(0);
       // delay(COOLDOWN_BETWEEN_COLUMNS_MS);
+      for (int puckno = 0; puckno < pucksToRemove - 1; ++puckno)
+      {
+        writeToSr(1 << curColIdx);
+        delay(PUCK_DROPTIME_MS);
+        writeToSr(0);
+        delay(COOLDOWN_PUCK_MS);
+      }
+      writeToSr(1 << curColIdx);
+      delay(PUCK_LAST_DROPTIME_MS);
+      writeToSr(0);
+      delay(PUCK_LAST_DROPTIME_MS);
+      writeToSr(1 << curColIdx);
+      delay(PUCK_LAST_DROPTIME_MS);
+      writeToSr(0);
+      delay(COOLDOWN_BETWEEN_COLUMNS_MS);
     }
   }
   // fast sequence to make sure solenoids close (open and close each solenoid a bunch of times)
