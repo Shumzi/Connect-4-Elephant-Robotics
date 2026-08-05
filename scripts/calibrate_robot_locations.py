@@ -72,19 +72,11 @@ def get_puck_seq(counter, start_seq, end_seq, end_seq_angles):
     start_seq_np = np.array(start_seq)
     end_seq_np = np.array(end_seq)
     end_seq_angles_np = np.array(end_seq_angles)
-    start = start_seq_np[-1]
-    end = end_seq_np[-1]
-
-    print("##################################" * 3)
-    print(start_seq_np)
-    print(start)
-    print(end_seq_np)
-    print(end)
-    print("##################################" * 3)
+    end_seq_last_step = end_seq_np[-1]
 
     t = counter / 20
     coords = np.hstack(
-        (start[:3] + t * (end[:3] - start[:3]), start[3:])
+        (start_seq_np[:3] + t * (end_seq_last_step[:3] - start_seq_np[:3]), start_seq_np[3:])
     )  # orientation of head should still be ~90,0,90
     puck_seq = np.vstack(
         (end_seq_angles_np[end_seq_np[:, 0] < coords[0]], coords)
