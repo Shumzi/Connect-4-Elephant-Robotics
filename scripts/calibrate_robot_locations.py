@@ -61,7 +61,7 @@ def calibrate_puck_stack(robot: RobotCommunicator, coord_json, angles_json, clr=
     robot.send_angles(angles_json["angle_table"][f"prepare"], 100)
     robot.send_coords(coord_json["angle_table"][f"stack-hover-{clr}"], 100)          
     robot.send_coords(coord_json["angle_table"][f"stack-{clr}-0"], 100)    
-    # robot.send_coords(coord_json["angle_table"][f"stack-{clr}-20"], 100)
+    robot.send_coords(coord_json["angle_table"][f"stack-{clr}-20"], 100)
     edit_mode_loop(robot, coord_json, angles_json, steps[3], json_path=DEFAULT_JSON_PATH, step_index=1)
     interp_from_first_and_last(robot, coord_json, angles_json, clr)
     input('put back all pucks')
@@ -266,6 +266,7 @@ def edit_mode_loop(
         if moved and saved is not None:
             base = list(saved)
             if isinstance(base[0], list): # if our location is an interpolation, take the end loc
+                # TODO: we currently take the start loc.. program crashes otherwise...
                 base = base[0]
         else:
             base = list(robot.get_current_coords())
