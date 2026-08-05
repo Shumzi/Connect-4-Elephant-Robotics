@@ -37,12 +37,11 @@ def calibrate_puck_stack(robot: RobotCommunicator, coord_json, angles_json, clr=
     7. test throwaway all pucks works ok"""
     steps = []
     steps.append((f"discard-puck", "coords", ("angle_table", "discard-puck")))
-    steps.append((f"stack-{clr}-start", "angles", ("angle_table", f"stack-{clr}-0")))
+    steps.append((f"stack-{clr}-start", "coords", ("angle_table", f"stack-{clr}-0")))
     steps.append((f"stack-{clr}-end", "forward-coords", ("angle_table", f"stack-{clr}-20")))
     robot.send_coords(coord_json["angle_table"]["discard-puck"], 100)
     edit_mode_loop(robot, coord_json, angles_json, steps[0], json_path=DEFAULT_JSON_PATH, step_index=1)
-    robot.send_angles(angles_json["angle_table"]["prepare"], 100)
-    robot.send_angles(angles_json["angle_table"][f"stack-hover-{clr}"], 100)
+    robot.send_coords(coord_json["angle_table"][f"stack-hover-{clr}"], 100)
     edit_mode_loop(robot, coord_json, angles_json, steps[1], json_path=DEFAULT_JSON_PATH, step_index=1)
     robot.release_servos()
     inp = input('starting discard sequence')
@@ -53,9 +52,9 @@ def calibrate_puck_stack(robot: RobotCommunicator, coord_json, angles_json, clr=
         robot.pump_release_and_off()
         inp = input('<enter> for pump on or q for exit')
     ###### save last puck loc
-    robot.send_angles(angles_json["angle_table"][f"prepare"], 100)            
-    robot.send_angles(angles_json["angle_table"][f"stack-{clr}-0"], 100)    
-    robot.send_angles(angles_json["angle_table"][f"stack-{clr}-20"], 100)
+    robot.send_coords(angles_json["angle_table"][f"prepare"], 100)            
+    robot.send_coords(angles_json["angle_table"][f"stack-{clr}-0"], 100)    
+    robot.send_coords(angles_json["angle_table"][f"stack-{clr}-20"], 100)
     edit_mode_loop(robot, coord_json, angles_json, steps[2], json_path=DEFAULT_JSON_PATH, step_index=1)
     interp_from_first_and_last(robot, coord_json, angles_json, clr)
     input('put back all pucks')
