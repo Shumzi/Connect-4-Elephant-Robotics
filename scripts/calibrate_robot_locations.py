@@ -256,7 +256,7 @@ def edit_mode_loop(
         if moved and saved is not None:
             base = list(saved)
             if isinstance(base[0], list): # if our location is an interpolation, take the end loc
-                base = base[-1]
+                base = base[0]
         else:
             base = list(robot.get_current_coords())
         offset = [0, 0, 0]  # Accumulated offset for X, Y, Z only
