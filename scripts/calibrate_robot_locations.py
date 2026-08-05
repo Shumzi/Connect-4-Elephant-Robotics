@@ -118,8 +118,8 @@ def interp_from_first_and_last(
     """
     fst = coord_json["angle_table"][f"stack-{clr}-0"]
     lst = coord_json["angle_table"][f"stack-{clr}-20"]
-    lst_angles = angles_json["angle_table"][f"stack-{clr}-end"]
-    robot.send_angles(coord_json["angle_table"]["prepare"], 50)
+    lst_angles = angles_json["angle_table"][f"stack-{clr}-20"]
+    # robot.send_angles(coord_json["angle_table"]["prepare"], 50) # this is bad - causes robo arm to crash into acrylic sylinder.
     robot.send_angles(angles_json["angle_table"][f"stack-{clr}-20"], 50)
     for i in range(1,21):
         puck_seq_i = get_puck_seq(20-i, fst, lst, lst_angles)
