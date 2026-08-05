@@ -52,9 +52,9 @@ def calibrate_puck_stack(robot: RobotCommunicator, coord_json, angles_json, clr=
         robot.pump_release_and_off()
         inp = input('<enter> for pump on or q for exit')
     ###### save last puck loc
-    robot.send_coords(angles_json["angle_table"][f"prepare"], 100)            
-    robot.send_coords(angles_json["angle_table"][f"stack-{clr}-0"], 100)    
-    robot.send_coords(angles_json["angle_table"][f"stack-{clr}-20"], 100)
+    robot.send_coords(coord_json["angle_table"][f"prepare"], 100)            
+    robot.send_coords(coord_json["angle_table"][f"stack-{clr}-0"], 100)    
+    robot.send_coords(coord_json["angle_table"][f"stack-{clr}-20"], 100)
     edit_mode_loop(robot, coord_json, angles_json, steps[2], json_path=DEFAULT_JSON_PATH, step_index=1)
     interp_from_first_and_last(robot, coord_json, angles_json, clr)
     input('put back all pucks')
