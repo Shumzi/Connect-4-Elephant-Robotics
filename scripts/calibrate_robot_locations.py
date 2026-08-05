@@ -66,7 +66,7 @@ def calibrate_puck_stack(robot: RobotCommunicator, coord_json, angles_json, clr=
 def get_puck_seq(counter, start_seq, end_seq, end_seq_angles):
     """
     given the counter, assuming x position is what differnetiates between linear movements,
-    return sequence from fst to counter puck using lst's coords
+    return sequence from start_seq to counter puck using end_seq's coords
     """
     start_seq_np = np.array(start_seq)
     end_seq_np = np.array(end_seq)
