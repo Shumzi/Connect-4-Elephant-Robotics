@@ -45,7 +45,7 @@ def calibrate_puck_stack(robot: RobotCommunicator, coord_json, angles_json, clr=
     robot.send_coords(coord_json["angle_table"][f"stack-hover-{clr}"], 100)
     edit_mode_loop(robot, coord_json, angles_json, steps[1], json_path=DEFAULT_JSON_PATH, step_index=1)
 
-    steps.append((f"stack-{clr}-start", "coords", ("angle_table", f"stack-{clr}-0")))
+    steps.append((f"stack-{clr}-start", "forward-coords", ("angle_table", f"stack-{clr}-0")))
     edit_mode_loop(robot, coord_json, angles_json, steps[2], json_path=DEFAULT_JSON_PATH, step_index=1)
 
     robot.release_servos()
@@ -61,7 +61,7 @@ def calibrate_puck_stack(robot: RobotCommunicator, coord_json, angles_json, clr=
     robot.send_angles(angles_json["angle_table"][f"prepare"], 100)
     robot.send_coords(coord_json["angle_table"][f"stack-hover-{clr}"], 100)          
     robot.send_coords(coord_json["angle_table"][f"stack-{clr}-0"], 100)    
-    robot.send_coords(coord_json["angle_table"][f"stack-{clr}-20"], 100)
+    # robot.send_coords(coord_json["angle_table"][f"stack-{clr}-20"], 100)
     edit_mode_loop(robot, coord_json, angles_json, steps[3], json_path=DEFAULT_JSON_PATH, step_index=1)
     interp_from_first_and_last(robot, coord_json, angles_json, clr)
     input('put back all pucks')
@@ -77,11 +77,12 @@ def get_puck_seq(counter, start_seq, end_seq, end_seq_angles):
     start_seq_np = np.array(start_seq)
     end_seq_np = np.array(end_seq)
     end_seq_angles_np = np.array(end_seq_angles)
+    start_seq_last_step = start_seq_np[-1]
     end_seq_last_step = end_seq_np[-1]
 
     t = counter / 20
     coords = np.hstack(
-        (start_seq_np[:3] + t * (end_seq_last_step[:3] - start_seq_np[:3]), start_seq_np[3:])
+        (start_seq_last_step[:3] + t * (end_seq_last_step[:3] - start_seq_last_step[:3]), start_seq_last_step[3:])
     )  # orientation of head should still be ~90,0,90
     print("###############################" * 3)
     print(coords)
