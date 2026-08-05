@@ -83,6 +83,10 @@ def get_puck_seq(counter, start_seq, end_seq, end_seq_angles):
     coords = np.hstack(
         (start_seq_np[:3] + t * (end_seq_last_step[:3] - start_seq_np[:3]), start_seq_np[3:])
     )  # orientation of head should still be ~90,0,90
+    print("###############################" * 3)
+    print(coords)
+    print(end_seq_np[:, 0])
+    print("###############################" * 3)
     puck_seq = np.vstack(
         (end_seq_angles_np[end_seq_np[:, 0] < coords[0]], coords)
     )  # take the seq from the 20th puck, and end at relative location for puck n.
