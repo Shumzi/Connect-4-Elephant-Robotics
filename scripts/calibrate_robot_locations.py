@@ -12,6 +12,7 @@ import json
 import re
 import sys
 from pathlib import Path
+from tracemalloc import start
 import numpy as np
 import serial
 from connect4_engine.hardware.arduino import ArduinoCommunicator
@@ -73,6 +74,13 @@ def get_puck_seq(counter, start_seq, end_seq, end_seq_angles):
     end_seq_angles_np = np.array(end_seq_angles)
     start = start_seq_np[-1]
     end = end_seq_np[-1]
+
+    print("##################################" * 3)
+    print(start_seq_np)
+    print(start)
+    print(end_seq_np)
+    print(end)
+    print("##################################" * 3)
 
     t = counter / 20
     coords = np.hstack(
